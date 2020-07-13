@@ -163,7 +163,7 @@ def example():
     label_spreading_output_labels = label_spreading.predict_classes()
     
     # Plot graphs
-    color_map = {-1: "orange", 0: "blue", 1: "green", 2: "red", 3: "cyan"}
+    color_map = {-1: "grey", 0: "blue", 1: "green", 2: "red", 3: "cyan"}
     input_labels_colors = [color_map[l] for l in labels]
     lprop_labels_colors = [color_map[l] for l in label_propagation_output_labels.numpy()]
     lspread_labels_colors = [color_map[l] for l in label_spreading_output_labels.numpy()]
@@ -185,7 +185,7 @@ def example():
     # Legend
     ax4 = plt.subplot(1, 4, 4)
     ax4.axis("off")
-    legend_colors = ["orange", "blue", "green", "red", "cyan"]
+    legend_colors = ["grey", "blue", "green", "red", "cyan"]
     legend_labels = ["unlabeled", "class 0", "class 1", "class 2", "class 3"]
     dummy_legend = [ax4.plot([], [], ls='-', c=c)[0] for c in legend_colors]
     plt.legend(dummy_legend, legend_labels)
