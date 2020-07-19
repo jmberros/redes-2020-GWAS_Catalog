@@ -1,5 +1,9 @@
 from abc import abstractmethod
+from operator import itemgetter
+
 import torch
+from tqdm import tqdm
+
 
 class BaseLabelPropagation:
     """Base class for label propagation models.
@@ -58,7 +62,7 @@ class BaseLabelPropagation:
         self.predictions = self.one_hot_labels.clone()
         prev_predictions = torch.zeros((self.n_nodes, self.n_classes), dtype=torch.float)
 
-        for i in range(max_iter):
+        for i in tqdm(range(max_iter), total=max_iter, desc="Iteración"):
             # Stop iterations if the system is considered at a steady state
             variation = torch.abs(self.predictions - prev_predictions).sum().item()
             
@@ -75,6 +79,17 @@ class BaseLabelPropagation:
     def predict_classes(self):
         return self.predictions.max(dim=1).indices
     
+    @property
+    def flat_predictions(self):
+        """Devuelve predicciones en una lista de un solo nivel.
+        Válido únicamente cuando se propaga una sola clase.
+        """
+        if not self.n_classes == 1:
+            raise Exception(f"Sólo válido cuando hay una sola clase, no {self.n_classes}")
+
+        return list(map(itemgetter(0), self.predictions.tolist()))
+
+
 class LabelPropagation(BaseLabelPropagation):
     def __init__(self, adj_matrix):
         super().__init__(adj_matrix)
