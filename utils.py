@@ -13,13 +13,14 @@ class BaseLabelPropagation:
     adj_matrix: torch.FloatTensor
         Adjacency matrix of the graph.
     """
-    def __init__(self, adj_matrix):
+    def __init__(self, adj_matrix, verbose=True):
         self.norm_adj_matrix = self._normalize(adj_matrix)
         self.n_nodes = adj_matrix.size(0)
         self.one_hot_labels = None 
         self.n_classes = None
         self.labeled_mask = None
         self.predictions = None
+        self.verbose = verbose
 
     @staticmethod
     @abstractmethod
@@ -62,12 +63,18 @@ class BaseLabelPropagation:
         self.predictions = self.one_hot_labels.clone()
         prev_predictions = torch.zeros((self.n_nodes, self.n_classes), dtype=torch.float)
 
-        for i in tqdm(range(max_iter), total=max_iter, desc="Iteración"):
+        iterations = range(max_iter) 
+        
+        if self.verbose:
+            iterations = tqdm(iterations, total=max_iter, desc="Iteración")
+            
+        for i in iterations:
             # Stop iterations if the system is considered at a steady state
             variation = torch.abs(self.predictions - prev_predictions).sum().item()
             
             if variation < tol:
-                print(f"The method stopped after {i} iterations, variation={variation:.4f}.")
+                if self.verbose:
+                    print(f"The method stopped after {i} iterations, variation={variation:.4f}.")
                 break
 
             prev_predictions = self.predictions
@@ -111,8 +118,8 @@ class LabelPropagation(BaseLabelPropagation):
         super().fit(labels, max_iter, tol)
         
 class LabelSpreading(BaseLabelPropagation):
-    def __init__(self, adj_matrix):
-        super().__init__(adj_matrix)
+    def __init__(self, adj_matrix, verbose=True):
+        super().__init__(adj_matrix, verbose)
         self.alpha = None
 
     @staticmethod
